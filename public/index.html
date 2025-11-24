@@ -1,0 +1,1437 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🏐 Volleyball – Live oversikt</title>
+<style>
+body{
+  font-family:'Segoe UI',Arial,sans-serif;
+  background:linear-gradient(180deg,#e9eef4 0%,#fff 100%);
+  color:#222;
+  margin:0;
+  padding:10px;
+  max-width:1100px;
+  margin-inline:auto;
+  line-height:1.3;
+}
+h1,h2,h3{
+  text-align:center;
+  margin:0 0 14px 0;
+}
+h1{font-size:1.5em;}
+h2{font-size:1.25em;}
+h3{font-size:1.1em;}
+.section{margin-top:20px;}
+.topnav{text-align:center;margin-bottom:10px;}
+.topnav button{
+  background:#0055aa;
+  color:#fff;
+  border:none;
+  padding:6px 14px;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:0.9em;
+  margin:0 4px;
+}
+.topnav button:hover{background:#004080;}
+.match{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border:1px solid #ddd;
+  border-radius:10px;
+  background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+  padding:6px 10px;
+  margin-bottom:10px;
+  transition:.2s ease;
+}
+.match:hover{transform:scale(1.01);}
+.team{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  align-items:center;
+  gap:6px;
+  width:34%;
+}
+.team img{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  border:1px solid #ccc;
+  object-fit:contain;
+  background:#fff;
+}
+.team-info{
+  display:flex;
+  flex-direction:column;
+  font-size:0.82em;
+  line-height:1.2;
+}
+.team-name{font-weight:600;}
+.league{font-size:0.8em;color:#666;}
+.players-inline{font-size:0.8em;color:#003b8e;}
+.players-inline a{color:#003b8e;text-decoration:none;font-weight:500;}
+.players-inline a:hover{text-decoration:underline;}
+.score{
+  text-align:center;
+  flex:0.32;
+  min-width:170px;
+  font-weight:600;
+  font-size:0.95em;
+}
+.live{color:#d00;font-weight:bold;animation:blink 1s infinite;}
+@keyframes blink{50%{opacity:.4;}}
+.table-btn{
+  background:#0055aa;
+  color:#fff;
+  border:none;
+  padding:3px 8px;
+  border-radius:6px;
+  font-size:0.8em;
+  cursor:pointer;
+  margin-top:4px;
+}
+.table-btn:hover{background:#003d80;}
+@media(max-width:700px){
+  .match{
+    flex-direction:column;
+    text-align:center;
+    padding:8px;
+  }
+  .team{
+    grid-template-columns:1fr;
+    justify-items:center;
+    width:100%;
+  }
+  .league,.players-inline{display:none;}
+  .score{margin:6px 0;}
+}
+.view{display:none;}
+.view.active{display:block;}
+.current-set{
+  background:#d00;
+  color:#fff;
+  font-weight:bold;
+  display:inline-block;
+  padding:3px 10px;
+  border-radius:6px;
+  margin-bottom:5px;
+  font-size:0.9em;
+}
+.sets-line{font-size:0.85em;color:#444;margin-top:3px;}
+.team-sets .box{
+  display:inline-block;
+  width:14px;
+  height:14px;
+  border-radius:3px;
+  margin:1px;
+}
+.team-sets .box.home{background:#0077ff;}
+.team-sets .box.away{background:#2ecc71;}
+.countdown{
+  display:block;
+  font-size:0.85em;
+  margin-top:4px;
+  color:#444;
+}
+.filter-buttons{text-align:center;margin-bottom:10px;}
+.filter-buttons button{
+  background:#0055aa;
+  color:#fff;
+  border:none;
+  padding:5px 10px;
+  margin:2px;
+  border-radius:6px;
+  font-size:0.85em;
+  cursor:pointer;
+}
+.filter-buttons button:hover{background:#003d80;}
+.filter-buttons button.active{background:#007bff;}
+#standingsOverlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  background:rgba(0,0,0,.35);
+  z-index:9999;
+  justify-content:center;
+  align-items:flex-start;
+  overflow:auto;
+}
+#standingsPanel{
+  background:#fff;
+  margin-top:40px;
+  width:min(900px,95vw);
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+  overflow:hidden;
+}
+.standings-header{
+  background:#0055aa;
+  color:#fff;
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.standings-header img{
+  width:46px;
+  height:46px;
+  border-radius:8px;
+  background:#fff;
+  object-fit:contain;
+}
+.standings-body{padding:12px 16px 16px 16px;background:#fff;}
+.standings-close{
+  margin-left:auto;
+  background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.35);
+  color:#fff;
+  padding:3px 9px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.standings-meta{font-size:0.75em;color:#666;margin-top:6px;}
+
+/* --- Mer kompakte kort for forrige kamper --- */
+.previous-match{
+  padding:3px 6px;
+  margin-bottom:6px;
+}
+.previous-match .team img{
+  width:30px;
+  height:30px;
+}
+.previous-match .team-info{
+  font-size:0.75em;
+  line-height:1.1;
+}
+.previous-match .score{
+  font-size:0.9em;
+  min-width:150px;
+}
+.previous-match .sets-line{
+  font-size:0.75em;
+  margin-top:1px;
+}
+.previous-match .table-btn{
+  margin-top:2px;
+  padding:2px 6px;
+  font-size:0.75em;
+}
+
+/* Accordion */
+.accordion-section{
+  border:1px solid #ccc;
+  border-radius:10px;
+  margin-top:16px;
+  background:#f7f9fc;
+}
+.accordion-toggle{
+  width:100%;
+  text-align:left;
+  background:#0055aa;
+  color:#fff;
+  border:none;
+  padding:10px 12px;
+  font-size:1em;
+  border-radius:10px 10px 0 0;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.accordion-toggle span.label{
+  font-weight:600;
+}
+.accordion-toggle span.icon{
+  font-size:1.1em;
+}
+.accordion-content{
+  display:none;
+  padding:10px 10px 14px 10px;
+}
+.accordion-content.open{
+  display:block;
+}
+
+/* Badge for hvilken gruppe i live-lista */
+.badge{
+  display:inline-block;
+  padding:2px 6px;
+  border-radius:999px;
+  font-size:0.7em;
+  margin-bottom:3px;
+  background:#e3eaf7;
+  color:#003b8e;
+}
+.badge.mizuno{background:#e6f3ff;}
+.badge.abroad{background:#ffeede;color:#9b3b00;}
+/* ===== Lag-modal ===== */
+#teamModalOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  justify-content:center;
+  align-items:flex-start;
+  z-index:10000;
+  overflow:auto;
+}
+
+#teamModal{
+  margin-top:40px;
+  background:#fff;
+  width:min(900px,95vw);
+  border-radius:16px;
+  box-shadow:0 18px 45px rgba(0,0,0,.35);
+  padding:18px 20px 20px;
+  position:relative;
+}
+
+#teamModalClose{
+  position:absolute;
+  top:8px;
+  right:10px;
+  border:none;
+  background:transparent;
+  font-size:1.4em;
+  cursor:pointer;
+  color:#666;
+}
+
+.team-modal-header{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-bottom:8px;
+}
+.team-modal-header img{
+  width:56px;
+  height:56px;
+  border-radius:12px;
+  border:1px solid #ddd;
+  object-fit:contain;
+  background:#fff;
+}
+.team-modal-title{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.team-modal-title h3{
+  margin:0;
+  font-size:1.2em;
+}
+.team-modal-meta{
+  font-size:0.8em;
+  color:#666;
+}
+
+.team-modal-body{
+  display:grid;
+  grid-template-columns:1.1fr 1fr;
+  gap:16px;
+  margin-top:12px;
+}
+
+.team-modal-section h4{
+  margin:0 0 6px 0;
+  font-size:0.95em;
+}
+.team-modal-section p{
+  margin:2px 0;
+  font-size:0.85em;
+}
+
+.team-modal-links a{
+  display:inline-block;
+  margin-right:8px;
+  margin-top:4px;
+  font-size:0.85em;
+  text-decoration:none;
+  color:#0055aa;
+}
+.team-modal-links a:hover{text-decoration:underline;}
+
+.team-modal-players{
+  margin-top:16px;
+}
+.team-modal-players h4{
+  margin:0 0 6px 0;
+  font-size:0.95em;
+}
+.player-row{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px solid #eee;
+  padding:4px 0;
+  font-size:0.84em;
+}
+.player-main{
+  font-weight:500;
+}
+.player-meta{
+  color:#666;
+  font-size:0.8em;
+}
+.player-link a{
+  font-size:0.8em;
+  color:#0055aa;
+  text-decoration:none;
+}
+.player-link a:hover{text-decoration:underline;}
+
+@media(max-width:800px){
+  .team-modal-body{
+    grid-template-columns:1fr;
+  }
+  #teamModal{
+    margin-top:20px;
+    padding:14px 12px 16px;
+  }
+}
+/* === Lag-modal – layout og animasjon === */
+
+#teamModalOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;              /* toggles i JS */
+  justify-content:center;
+  align-items:flex-start;
+  z-index:10000;
+  overflow:auto;
+}
+
+#teamModal{
+  margin-top:40px;
+  background:#ffffff;
+  width:min(900px,95vw);
+  border-radius:18px;
+  box-shadow:0 18px 45px rgba(0,0,0,.35);
+  padding:18px 20px 20px;
+  position:relative;
+
+  /* anim base */
+  opacity:0;
+  transform:translateY(12px) scale(.97);
+  transition:opacity .18s ease-out, transform .18s ease-out;
+}
+
+#teamModal.show{
+  opacity:1;
+  transform:none;
+}
+
+#teamModalClose{
+  position:absolute;
+  top:8px;
+  right:10px;
+  border:none;
+  background:transparent;
+  font-size:1.4em;
+  cursor:pointer;
+  color:#666;
+}
+
+.team-modal-header{
+  display:flex;
+  gap:14px;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.team-modal-header img{
+  width:64px;
+  height:64px;
+  border-radius:16px;
+  border:1px solid #dde3f0;
+  object-fit:contain;
+  background:#fff;
+}
+
+.team-modal-title{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.team-modal-title h3{
+  margin:0;
+  font-size:1.3em;
+}
+.team-modal-meta{
+  font-size:0.8em;
+  color:#667;
+}
+
+.team-modal-body{
+  display:grid;
+  grid-template-columns:1.1fr 1fr;
+  gap:18px;
+  margin-top:12px;
+}
+
+.team-modal-section h4{
+  margin:0 0 6px 0;
+  font-size:0.95em;
+}
+.team-modal-section p{
+  margin:2px 0;
+  font-size:0.85em;
+}
+
+.team-modal-links a{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  margin-right:8px;
+  margin-top:4px;
+  font-size:0.85em;
+  text-decoration:none;
+  color:#0055aa;
+  padding:3px 8px;
+  border-radius:999px;
+  background:#e6efff;
+}
+.team-modal-links a:hover{
+  background:#d3e3ff;
+}
+
+.team-modal-players{
+  margin-top:16px;
+}
+.team-modal-players h4{
+  margin:0 0 8px 0;
+  font-size:0.95em;
+}
+
+/* spiller-kort i grid */
+
+.team-modal-players-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:8px;
+}
+
+.player-card{
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+  padding:6px 8px;
+  border-radius:10px;
+  background:#f7f9fc;
+  border:1px solid #e1e6f0;
+  font-size:0.84em;
+}
+
+.player-avatar{
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:0.8em;
+  font-weight:600;
+  color:#fff;
+  background:linear-gradient(135deg,#0055aa,#00a2ff);
+  flex-shrink:0;
+  text-transform:uppercase;
+}
+
+.player-avatar img{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  object-fit:cover;
+}
+
+.player-main{
+  font-weight:600;
+  margin-bottom:1px;
+}
+.player-meta{
+  color:#666;
+  font-size:0.78em;
+}
+.player-link a{
+  font-size:0.78em;
+  color:#0055aa;
+  text-decoration:none;
+}
+.player-link a:hover{text-decoration:underline;}
+
+/* litt “klikkbarhet” på lagblokkene */
+
+.team.team-clickable{
+  cursor:pointer;
+  transition:transform .1s ease-out, box-shadow .1s ease-out;
+}
+.team.team-clickable:hover{
+  transform:translateY(-1px);
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
+}
+
+@media(max-width:800px){
+  #teamModal{
+    margin-top:20px;
+    padding:14px 12px 16px;
+  }
+  .team-modal-body{
+    grid-template-columns:1fr;
+  }
+}
+
+</style>
+</head>
+<body>
+<h1>🏐 Volleyball – Live oversikt</h1>
+
+<div class="section">
+  <h2>🔴 Live kamper – alle (Mizunoliga + utlandet)</h2>
+  <div id="live-combined">Laster …</div>
+</div>
+
+<!-- Accordion: Mizunoliga -->
+<div class="accordion-section">
+  <button class="accordion-toggle" data-target="mizuno-content">
+    <span class="label">🏆 Volleyball – Mizunoliga – Norsk eliteserie</span>
+    <span class="icon">＋</span>
+  </button>
+  <div id="mizuno-content" class="accordion-content">
+    <div class="topnav">
+      <button id="btnCurrentMizuno">📅 Aktuelle kamper</button>
+      <button id="btnPreviousMizuno">📜 Forrige kamper</button>
+      <button id="btnTablesMizuno">📊 Tabeller</button>
+    </div>
+
+    <div id="currentViewMizuno" class="view active">
+      <div class="section">
+        <h3>🔴 Live kamper – Mizunoliga</h3>
+        <div id="live-mizuno">Laster …</div>
+      </div>
+      <div class="section">
+        <h3>📅 Neste kamper + Norske spillere 🇳🇴</h3>
+        <div id="upcoming-mizuno">Laster …</div>
+      </div>
+    </div>
+
+    <div id="previousViewMizuno" class="view">
+      <div class="section">
+        <h3>📜 Forrige kamper – Mizunoliga</h3>
+        <div id="previous-mizuno">Laster …</div>
+      </div>
+    </div>
+
+    <div id="tablesViewMizuno" class="view">
+      <div class="section">
+        <h3>📊 Liga-tabeller – Mizunoliga</h3>
+        <div class="filter-buttons" id="filterButtonsMizuno"></div>
+        <div id="tables-mizuno">Laster tabeller …</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Accordion: Utlandet -->
+<div class="accordion-section">
+  <button class="accordion-toggle" data-target="abroad-content">
+    <span class="label">🌍 Volleyball – Norske spillere i utlandet</span>
+    <span class="icon">＋</span>
+  </button>
+  <div id="abroad-content" class="accordion-content">
+    <div class="topnav">
+      <button id="btnCurrentAbroad">📅 Aktuelle kamper</button>
+      <button id="btnPreviousAbroad">📜 Forrige kamper</button>
+      <button id="btnTablesAbroad">📊 Tabeller</button>
+    </div>
+
+    <div id="currentViewAbroad" class="view active">
+      <div class="section">
+        <h3>🔴 Live kamper – utlandet</h3>
+        <div id="live-abroad">Laster …</div>
+      </div>
+      <div class="section">
+        <h3>📅 Neste kamper + Norske spillere 🇳🇴</h3>
+        <div id="upcoming-abroad">Laster …</div>
+      </div>
+    </div>
+
+    <div id="previousViewAbroad" class="view">
+      <div class="section">
+        <h3>📜 Forrige kamper – utlandet</h3>
+        <div id="previous-abroad">Laster …</div>
+      </div>
+    </div>
+
+    <div id="tablesViewAbroad" class="view">
+      <div class="section">
+        <h3>📊 Liga-tabeller – utlandet</h3>
+        <div class="filter-buttons" id="filterButtonsAbroad"></div>
+        <div id="tables-abroad">Laster tabeller …</div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Lag-modal -->
+<div id="teamModalOverlay">
+  <div id="teamModal">
+    <button id="teamModalClose" onclick="closeTeamModal()">×</button>
+
+    <div class="team-modal-header">
+      <img id="teamModalLogo" src="" alt="Logo">
+      <div class="team-modal-title">
+        <h3 id="teamModalName">Lagnavn</h3>
+        <div class="team-modal-meta">
+          <span id="teamModalLeague"></span>
+          <span id="teamModalCountry"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="team-modal-body">
+      <div class="team-modal-section">
+        <h4>Laginfo</h4>
+        <p id="teamModalGroup"></p>
+        <p id="teamModalWidget"></p>
+        <p id="teamModalIds"></p>
+        <div class="team-modal-links" id="teamModalLinks"></div>
+      </div>
+
+      <div class="team-modal-section">
+        <h4>Neste kamp</h4>
+        <div id="teamModalNext"></div>
+
+        <h4 style="margin-top:10px;">Forrige kamp</h4>
+        <div id="teamModalPrev"></div>
+      </div>
+    </div>
+
+    <div class="team-modal-players">
+      <h4>Spillere</h4>
+      <div id="teamModalPlayers"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Felles tabell-overlay -->
+<div id="standingsOverlay">
+  <div id="standingsPanel">
+    <div class="standings-header">
+      <img id="standingsLogo" src="" alt="logo" onerror="this.style.display='none'">
+      <div>
+        <h3 id="standingsTitle">Tabell</h3>
+        <div id="standingsSubtitle" style="font-size:0.8em;opacity:.9;"></div>
+      </div>
+      <button class="standings-close" onclick="closeStandings()">Lukk</button>
+    </div>
+    <div class="standings-body">
+      <div id="standingsContent" style="text-align:center;"></div>
+      <div class="standings-meta">Data hentes fra SofaScore.</div>
+    </div>
+  </div>
+</div>
+<!-- Lag-modal -->
+<div id="teamModalOverlay">
+  <div id="teamModal">
+    <button id="teamModalClose" onclick="closeTeamModal()">×</button>
+    <div class="team-modal-header">
+      <img id="teamModalLogo" src="" alt="Logo">
+      <div class="team-modal-title">
+        <h3 id="teamModalName">Lag</h3>
+        <div class="team-modal-meta">
+          <span id="teamModalLeague"></span>
+          <span id="teamModalCountry"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="team-modal-body">
+      <div class="team-modal-section">
+        <h4>Laginfo</h4>
+        <p id="teamModalGroup"></p>
+        <p id="teamModalWidget"></p>
+        <p id="teamModalIds"></p>
+        <div class="team-modal-links" id="teamModalLinks"></div>
+      </div>
+
+      <div class="team-modal-section">
+        <h4>Neste kamp</h4>
+        <div id="teamModalNext"></div>
+
+        <h4 style="margin-top:10px;">Forrige kamp</h4>
+        <div id="teamModalPrev"></div>
+      </div>
+    </div>
+
+    <div class="team-modal-players">
+      <h4>Spillere</h4>
+      <div id="teamModalPlayers"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =================== Globale datastrukturer =================== */
+
+let mizunoTeams = [];
+let abroadTeams = [];
+let players = [];
+let playersByTeamSlug = {};
+
+/* =================== Henting fra eget API =================== */
+
+async function apiGet(path) {
+  const res = await fetch(path);
+  if (!res.ok) throw new Error("API-feil: " + path + " (" + res.status + ")");
+  return res.json();
+}
+
+async function loadDataFromBackend() {
+  mizunoTeams = await apiGet("/api/teams?group=mizuno");
+  abroadTeams = await apiGet("/api/teams?group=abroad");
+  players = await apiGet("/api/players");
+
+  // Bygg kart: slug -> liste med spillere
+  playersByTeamSlug = {};
+  const allTeams = [...mizunoTeams, ...abroadTeams];
+
+  players.forEach(p => {
+    const team = allTeams.find(t => t.id === p.team_id);
+    if (!team || !team.slug) return;
+    if (!playersByTeamSlug[team.slug]) playersByTeamSlug[team.slug] = [];
+    playersByTeamSlug[team.slug].push({
+      name: p.name,
+      url: p.external_url
+    });
+  });
+}
+
+/* =================== Hjelpefunksjoner (SofaScore) =================== */
+
+async function fetchJSON(url){
+  const r = await fetch(url);
+  if(!r.ok) throw new Error("fetch feil " + url + " (" + r.status + ")");
+  return r.json();
+}
+
+function renderPlayersInline(map, slug){
+  const list = map[slug] || [];
+  if(!list || !list.length) return "";
+  return list.map(x=>`<a href="${x.url}" target="_blank">🇳🇴 ${x.name}</a>`).join(", ");
+}
+
+// Tar enten et DB-lag eller et fallback-lag bygget fra SofaScore-event
+function renderTeamBlock(team){
+  // Sofascore-id kan komme fra DB-feltet, ellers fra fallback-objektets id
+  const sofaId = team.sofascore_team_id ?? team.id;
+  const logo = `https://api.sofascore.com/api/v1/team/${sofaId}/image`;
+  const playersInline = team.slug ? renderPlayersInline(playersByTeamSlug, team.slug) : "";
+
+  // team.id er DB-id for lag i vår egen tabell.
+  return `<div class="team team-clickable"
+              data-team-id="${team.id || ""}"
+              data-sofa-id="${sofaId}"
+              onclick="openTeamModal(this)">
+    <img src="${logo}" alt="${team.name}">
+    <div class="team-info">
+      <span class="team-name">${team.name}</span>
+      <span class="league">${team.league || ""}</span>
+      <span class="players-inline">${playersInline}</span>
+    </div>
+  </div>`;
+}
+
+
+// Fall-back hvis motstanderlaget ikke finnes i databasen
+function resolveTeamFromEventTeam(eventTeam, teams){
+  const found = teams.find(t => t.sofascore_team_id === eventTeam.id);
+  if (found) return found;
+  return {
+    id: eventTeam.id,           // brukes som sofascore-id
+    sofascore_team_id: eventTeam.id,
+    name: eventTeam.name,
+    league: "",
+    country: "",
+    slug: null
+  };
+}
+
+// viser SETT-score i rødt for live, men IKKE for ferdigspilte kamper
+function renderSets(e, isLive = false) {
+  const sets = [];
+  for (let i = 1; i <= 5; i++) {
+    const hs = e.homeScore?.[`period${i}`];
+    const as = e.awayScore?.[`period${i}`];
+    if (hs !== undefined && as !== undefined) {
+      sets.push({ hs, as });
+    }
+  }
+
+  const setScore = (isLive && e.homeScore?.display !== undefined && e.awayScore?.display !== undefined)
+    ? `<div class="current-set">${e.homeScore.display}–${e.awayScore.display}</div>`
+    : "";
+
+  const homeBoxes = sets
+    .filter(s => s.hs > s.as)
+    .map(() => '<span class="box home"></span>')
+    .join('');
+  const awayBoxes = sets
+    .filter(s => s.as > s.hs)
+    .map(() => '<span class="box away"></span>')
+    .join('');
+
+  const setsLine = sets.length
+    ? `<div class="sets-line">(${sets.map(s => `${s.hs}–${s.as}`).join(", ")})</div>`
+    : "";
+
+  return `<div>
+    ${setScore}
+    <div class="team-sets">${homeBoxes}${awayBoxes}</div>
+    ${setsLine}
+  </div>`;
+}
+
+/* =================== Lag-modal =================== */
+
+function renderModalMatchHeader(e){
+  if(!e) return "<p style='font-size:0.85em;color:#666;'>Ingen kamp funnet.</p>";
+
+  const start = new Date(e.startTimestamp * 1000)
+    .toLocaleString("no-NO",{ dateStyle:"short", timeStyle:"short" });
+
+  const homeName = e.homeTeam?.name || "Hjemmelag";
+  const awayName = e.awayTeam?.name || "Bortelag";
+
+  const statusType = e.status?.type || "";
+  const statusText =
+    statusType === "finished" ? "Ferdig" :
+    statusType === "notstarted" ? "Ikke startet" :
+    e.status?.description || "";
+
+  return `
+    <p style="margin:0;font-weight:600;">${homeName} – ${awayName}</p>
+    <p style="margin:2px 0 4px 0;font-size:0.8em;color:#555;">
+      ${start} • ${statusText}
+    </p>
+  `;
+}
+
+// Bruker eksisterende renderSets for å vise sett-statistikk
+function renderModalMatchStats(e, isLive = false){
+  if(!e) return "";
+  const setsHtml = renderSets(e, isLive);
+  const result =
+    (e.homeScore?.display != null && e.awayScore?.display != null)
+      ? `<div style="margin-top:4px;font-size:0.9em;font-weight:600;">
+           Resultat (sett): ${e.homeScore.display}–${e.awayScore.display}
+         </div>`
+      : "";
+
+  return `
+    <div style="font-size:0.85em;">
+      ${setsHtml}
+      ${result}
+    </div>
+  `;
+}
+
+function buildPlayerAvatarHtml(p) {
+  // 1. Hvis database-URL finnes → bruk den
+  if (p.photo_url) {
+    return `<div class="player-avatar"><img src="${p.photo_url}" alt="${p.name}"></div>`;
+  }
+
+  // 2. Automatisk generert filnavn basert på spillerens navn
+  const baseName = p.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")      // alle mellomrom/æøå/tegn → _
+    .replace(/^_+|_+$/g, "");         // fjern leading/trailing _
+
+  const possiblePaths = [
+    `/img/players/${baseName}.jpg`,
+    `/img/players/${baseName}.jpeg`,
+    `/img/players/${baseName}.png`,
+    `/img/players/${baseName}.webp`,
+  ];
+
+  // 3. Returner JS som prøver filene i rekkefølge
+  //    og faller tilbake til initial-avatar
+  const fallbackInitial = getInitialAvatar(p);
+
+  const tries = possiblePaths
+    .map(path => `new Image().src='${path}'`)
+    .join(";");
+
+  // Denne versjonen prøver hvert bilde dynamisk – og returnerer første som finnes
+  return `
+    <div class="player-avatar" data-name="${p.name}">
+      <img 
+        src="${possiblePaths[0]}" 
+        onerror="(function(img){
+          const base='${baseName}';
+          const exts=['jpg','jpeg','png','webp'];
+          (function tryNext(i){
+            if(i>=exts.length){
+              img.outerHTML='${fallbackInitial.replace(/"/g, "&quot;")}';
+              return;
+            }
+            const path='/img/players/'+base+'.'+exts[i];
+            const test=new Image();
+            test.onload=()=>img.src=path;
+            test.onerror=()=>tryNext(i+1);
+            test.src=path;
+          })(1);
+        })(this)"
+      >
+    </div>
+  `;
+}
+
+// 4. Initial-avatar for fallback
+function getInitialAvatar(p){
+  const initials = (p.name || "")
+    .split(" ")
+    .filter(Boolean)
+    .map(n => n[0])
+    .join("")
+    .slice(0,2)
+    .toUpperCase();
+
+  return `<div class="player-avatar">${initials}</div>`;
+}
+
+
+async function openTeamModal(el){
+  const sofaId = Number(el.dataset.sofaId);
+  const dbId = el.dataset.teamId ? Number(el.dataset.teamId) : null;
+
+  const allTeams = [...mizunoTeams, ...abroadTeams];
+  let team = null;
+
+  if(dbId){
+    team = allTeams.find(t => t.id === dbId);
+  }
+  if(!team){
+    team = allTeams.find(t => t.sofascore_team_id === sofaId) || null;
+  }
+
+  // fallback-navn fra DOM
+  const nameFromDom = el.querySelector(".team-name")?.textContent || "Lag";
+
+  const finalSofaId = team?.sofascore_team_id || sofaId;
+  const teamName = team?.name || nameFromDom;
+
+  // header
+  const logoUrl = `https://api.sofascore.com/api/v1/team/${finalSofaId}/image`;
+  document.getElementById("teamModalLogo").src = logoUrl;
+  document.getElementById("teamModalName").textContent = teamName;
+  document.getElementById("teamModalLeague").textContent = team?.league || "";
+  document.getElementById("teamModalCountry").textContent =
+    team?.country ? " • " + team.country : "";
+
+  document.getElementById("teamModalGroup").textContent =
+    team?.group_type ? `Gruppe: ${team.group_type}` : "Gruppe: ukjent";
+
+  document.getElementById("teamModalWidget").textContent =
+    team?.widget_name ? `Widget: ${team.widget_name}` : "";
+
+  document.getElementById("teamModalIds").textContent =
+    team
+      ? `SofaScore team-id: ${team.sofascore_team_id ?? "-"}, `
+        + `tournament: ${team.tournament_id ?? "-"}, `
+        + `season: ${team.season_id ?? "-"}`
+      : `SofaScore team-id: ${finalSofaId}`;
+
+  // lenker
+  const linksEl = document.getElementById("teamModalLinks");
+  if(team && (team.homepage_url || team.stream_url)){
+    let html = "";
+    if(team.homepage_url){
+      html += `<a href="${team.homepage_url}" target="_blank">🌐 Hjemmeside</a>`;
+    }
+    if(team.stream_url){
+      html += `<a href="${team.stream_url}" target="_blank">📺 Stream</a>`;
+    }
+    linksEl.innerHTML = html;
+  }else{
+    linksEl.innerHTML =
+      `<span style="font-size:0.8em;color:#777;">Ingen lenker registrert.</span>`;
+  }
+
+  // spillere fra vårt eget API
+  const playersEl = document.getElementById("teamModalPlayers");
+  if(team){
+    const teamPlayers = players.filter(p => p.team_id === team.id);
+    if(teamPlayers.length){
+      playersEl.innerHTML = `
+        <div class="team-modal-players-grid">
+          ${teamPlayers.map(p => `
+            <div class="player-card">
+              ${buildPlayerAvatarHtml(p)}
+              <div>
+                <div class="player-main">${p.name}</div>
+                <div class="player-meta">
+                  ${p.position || "Posisjon ukjent"}
+                  ${p.jersey_number ? ` • #${p.jersey_number}` : ""}
+                  ${p.nationality ? ` • ${p.nationality}` : ""}
+                </div>
+                <div class="player-link">
+                  ${p.external_url ? `<a href="${p.external_url}" target="_blank">Profil</a>` : ""}
+                </div>
+              </div>
+            </div>
+          `).join("")}
+        </div>`;
+    }else{
+      playersEl.innerHTML =
+        `<p style="font-size:0.85em;color:#666;">Ingen spillere registrert på dette laget ennå.</p>`;
+    }
+  }else{
+    playersEl.innerHTML =
+      `<p style="font-size:0.85em;color:#666;">Laget finnes ikke i databasen ennå.</p>`;
+  }
+
+  // neste / forrige kamp fra SofaScore
+  const nextEl = document.getElementById("teamModalNext");
+  const prevEl = document.getElementById("teamModalPrev");
+  nextEl.innerHTML = "<p style='font-size:0.85em;color:#666;'>Laster …</p>";
+  prevEl.innerHTML = "<p style='font-size:0.85em;color:#666;'>Laster …</p>";
+
+  try{
+    const [nextData, prevData] = await Promise.all([
+      fetchJSON(`https://api.sofascore.com/api/v1/team/${finalSofaId}/events/next/0`),
+      fetchJSON(`https://api.sofascore.com/api/v1/team/${finalSofaId}/events/last/0`)
+    ]);
+
+    const nextEvent = nextData.events?.[0] || null;
+    const prevEvent = prevData.events?.at(-1) || prevData.events?.[0] || null;
+
+    nextEl.innerHTML = nextEvent
+      ? renderModalMatchHeader(nextEvent) + renderModalMatchStats(nextEvent,false)
+      : "<p style='font-size:0.85em;color:#666;'>Ingen kommende kamp funnet.</p>";
+
+    prevEl.innerHTML = prevEvent
+      ? renderModalMatchHeader(prevEvent) + renderModalMatchStats(prevEvent,false)
+      : "<p style='font-size:0.85em;color:#666;'>Ingen tidligere kamp funnet.</p>";
+  }catch(e){
+    console.error(e);
+    nextEl.innerHTML = "<p style='font-size:0.85em;color:#666;'>Kunne ikke hente neste kamp.</p>";
+    prevEl.innerHTML = "<p style='font-size:0.85em;color:#666;'>Kunne ikke hente forrige kamp.</p>";
+  }
+
+  const overlay = document.getElementById("teamModalOverlay");
+  const modal = document.getElementById("teamModal");
+  overlay.style.display = "flex";
+  // trigger anim
+  requestAnimationFrame(() => {
+    modal.classList.add("show");
+  });
+}
+
+function closeTeamModal(){
+  const overlay = document.getElementById("teamModalOverlay");
+  const modal = document.getElementById("teamModal");
+  modal.classList.remove("show");
+  setTimeout(() => {
+    overlay.style.display = "none";
+  }, 180);
+}
+
+// lukk på klikk utenfor
+document.addEventListener("click", (e)=>{
+  const overlay = document.getElementById("teamModalOverlay");
+  if(overlay.style.display === "flex" &&
+     e.target === overlay){
+    closeTeamModal();
+  }
+});
+
+
+/* =================== Live-kamper =================== */
+
+async function updateLiveForTeams(teams, containerId, badgeClass, badgeLabel){
+  const c = document.getElementById(containerId);
+  try{
+    const ev = await fetchJSON("https://api.sofascore.com/api/v1/sport/volleyball/events/live");
+
+    // filtrer alle relevante kamper
+    const my = ev.events?.filter(e =>
+      teams.some(t =>
+        t.sofascore_team_id === e.homeTeam.id ||
+        t.sofascore_team_id === e.awayTeam.id
+      )
+    ) || [];
+
+    // dedupe basert på event ID
+    const unique = [];
+    const seen = new Set();
+    for(const e of my){
+      if(!seen.has(e.id)){
+        seen.add(e.id);
+        unique.push(e);
+      }
+    }
+
+    if(!unique.length){
+      c.innerHTML = "<p>Ingen pågående kamper nå.</p>";
+      return;
+    }
+
+    const allTeams = [...mizunoTeams, ...abroadTeams];
+
+    const details = await Promise.all(
+      unique.map(e => fetchJSON(`https://api.sofascore.com/api/v1/event/${e.id}`))
+    );
+
+    c.innerHTML = details.map(d => {
+      const e = d.event;
+      const h = resolveTeamFromEventTeam(e.homeTeam, allTeams);
+      const a = resolveTeamFromEventTeam(e.awayTeam, allTeams);
+      const badge = badgeLabel ? `<div class="badge ${badgeClass || ""}">${badgeLabel}</div>` : "";
+
+      return `<div class="match">
+        ${renderTeamBlock(h)}
+        <div class="score">
+          ${badge}
+          🔥 <span class="live">LIVE</span>
+          ${renderSets(e,true)}
+        </div>
+        ${renderTeamBlock(a)}
+      </div>`;
+    }).join("");
+
+  }catch(err){
+    console.error(err);
+    c.innerHTML = "<p>Kunne ikke hente live-data.</p>";
+  }
+}
+
+// Kombinert live – bruker union av begge lister
+async function updateLiveCombined(){
+  const allTeams = mizunoTeams.concat(abroadTeams);
+  await updateLiveForTeams(allTeams, "live-combined", "", "");
+}
+
+/* =================== Kommende kamper =================== */
+
+async function updateUpcomingForTeams(teams, containerId){
+  const c = document.getElementById(containerId);
+  c.innerHTML = "";
+
+  const all = [];
+  const seen = new Set();
+
+  for(const t of teams){
+    try{
+      const d = await fetchJSON(`https://api.sofascore.com/api/v1/team/${t.sofascore_team_id}/events/next/0`);
+      const e = d.events?.[0];
+      if(e && !seen.has(e.id)){
+        seen.add(e.id);
+        all.push(e);
+      }
+    }catch(err){
+      console.error(err);
+    }
+  }
+
+  all.sort((a,b)=>a.startTimestamp-b.startTimestamp);
+
+  if(!all.length){
+    c.innerHTML = "<p>Ingen kommende kamper funnet.</p>";
+    return;
+  }
+
+  const allTeams = mizunoTeams.concat(abroadTeams);
+
+  all.forEach(e=>{
+    const h = resolveTeamFromEventTeam(e.homeTeam, allTeams);
+    const a = resolveTeamFromEventTeam(e.awayTeam, allTeams);
+
+    const timeLeft = e.startTimestamp*1000 - Date.now();
+    const dL = Math.floor(timeLeft/86400000),
+          hL = Math.floor(timeLeft/3600000)%24,
+          mL = Math.floor(timeLeft/60000)%60;
+
+    const cd = timeLeft>0 ? `${dL}d ${hL}t ${mL}m` : "Snart!";
+
+    c.innerHTML += `<div class="match">
+      ${renderTeamBlock(h)}
+      <div class="score">
+        ${new Date(e.startTimestamp*1000).toLocaleString("no-NO",{dateStyle:"short",timeStyle:"short"})}
+        <span class="countdown">${cd}</span>
+      </div>
+      ${renderTeamBlock(a)}
+    </div>`;
+  });
+}
+
+/* =================== Forrige kamper =================== */
+
+async function updatePreviousForTeams(teams, containerId, groupLabel){
+  const c = document.getElementById(containerId);
+  c.innerHTML = "";
+
+  const seen = new Set();
+  const all = [];
+
+  for(const t of teams){
+    try{
+      const d = await fetchJSON(`https://api.sofascore.com/api/v1/team/${t.sofascore_team_id}/events/last/0`);
+      const e = d.events?.at(-1);
+      if(e && !seen.has(e.id)){
+        seen.add(e.id);
+        all.push({e,t});
+      }
+    }catch(err){
+      console.error(err);
+    }
+  }
+
+  all.sort((a,b)=>b.e.startTimestamp-a.e.startTimestamp);
+
+  if(!all.length){
+    c.innerHTML = "<p>Ingen tidligere kamper funnet.</p>";
+    return;
+  }
+
+  const allTeams = mizunoTeams.concat(abroadTeams);
+
+  c.innerHTML = all.map(({e,t})=>{
+    const h = resolveTeamFromEventTeam(e.homeTeam, allTeams);
+    const a = resolveTeamFromEventTeam(e.awayTeam, allTeams);
+
+    return `<div class="match previous-match">
+      ${renderTeamBlock(h)}
+      <div class="score">
+        ${groupLabel ? `<div class="badge">${groupLabel}</div>` : ""}
+        ${e.homeScore.display}–${e.awayScore.display}
+        ${renderSets(e,false)}
+        <br>
+        <span style="font-size:0.8em;color:#666;">
+          ${new Date(e.startTimestamp*1000).toLocaleString("no-NO",{dateStyle:"short",timeStyle:"short"})}
+        </span><br>
+        <button class="table-btn" onclick="openStandingsOverlay(${t.tournament_id},${t.season_id}, '${t.league}', '${t.name}')">📊 Se tabell</button>
+      </div>
+      ${renderTeamBlock(a)}
+    </div>`;
+  }).join("");
+}
+
+/* =================== Tabeller =================== */
+
+function renderTablesForTeams(teams, filterContainerId, tablesContainerId){
+  const c = document.getElementById(tablesContainerId);
+  const f = document.getElementById(filterContainerId);
+  const countries = ["Alle", ...new Set(teams.map(t=>t.country).filter(Boolean))];
+  const current = f.dataset.selected || "Alle";
+
+  f.innerHTML = countries.map(x=>`<button class="${x===current?'active':''}" onclick="setTableFilter('${filterContainerId}','${tablesContainerId}','${x}')">${x}</button>`).join("");
+  c.innerHTML = "";
+  teams.forEach(t=>{
+    if(current !== "Alle" && t.country !== current) return;
+    const url = `https://widgets.sofascore.com/no/embed/tournament/${t.tournament_id}/season/${t.season_id}/standings?showCompetitionLogo=true&showTeamLogo=true`;
+    c.innerHTML += `<div style="margin-bottom:35px;border:1px solid #ccc;border-radius:10px;overflow:hidden;">
+      <div style="background:#0055aa;color:#fff;padding:8px 12px;font-weight:600;">${t.widget_name}</div>
+      <iframe src="${url}" style="width:100%;height:700px;border:0;" scrolling="no"></iframe>
+    </div>`;
+  });
+}
+
+function setTableFilter(filterContainerId, tablesContainerId, value){
+  const f = document.getElementById(filterContainerId);
+  f.dataset.selected = value;
+  if(filterContainerId === "filterButtonsMizuno"){
+    renderTablesForTeams(mizunoTeams, filterContainerId, tablesContainerId);
+  }else{
+    renderTablesForTeams(abroadTeams, filterContainerId, tablesContainerId);
+  }
+}
+
+/* =================== Popup for tabell =================== */
+
+function openStandingsOverlay(tid,sid,title,team){
+  const o=document.getElementById("standingsOverlay");
+  document.getElementById("standingsTitle").textContent = title || "Tabell";
+  document.getElementById("standingsSubtitle").textContent = (team || "") + " • SofaScore";
+  document.getElementById("standingsLogo").src = `https://api.sofascore.com/api/v1/unique-tournament/${tid}/image`;
+  const iframeSrc=`https://widgets.sofascore.com/no/embed/tournament/${tid}/season/${sid}/standings?showCompetitionLogo=true&showTeamLogo=true`;
+  document.getElementById("standingsContent").innerHTML=`<iframe src="${iframeSrc}" style="width:100%;height:700px;border:0;"></iframe>`;
+  o.style.display="flex";
+}
+function closeStandings(){
+  document.getElementById("standingsOverlay").style.display="none";
+}
+
+/* =================== Visningsbytte i seksjonene =================== */
+
+function showViewMizuno(id){
+  ["currentViewMizuno","previousViewMizuno","tablesViewMizuno"].forEach(v=>document.getElementById(v).classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if(id==="tablesViewMizuno"){
+    renderTablesForTeams(mizunoTeams,"filterButtonsMizuno","tables-mizuno");
+  }
+}
+function showViewAbroad(id){
+  ["currentViewAbroad","previousViewAbroad","tablesViewAbroad"].forEach(v=>document.getElementById(v).classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if(id==="tablesViewAbroad"){
+    renderTablesForTeams(abroadTeams,"filterButtonsAbroad","tables-abroad");
+  }
+}
+
+/* =================== Accordion-logikk =================== */
+document.querySelectorAll(".accordion-toggle").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const targetId = btn.dataset.target;
+    const content = document.getElementById(targetId);
+    const icon = btn.querySelector(".icon");
+    const isOpen = content.classList.contains("open");
+    if(isOpen){
+      content.classList.remove("open");
+      icon.textContent = "＋";
+    }else{
+      content.classList.add("open");
+      icon.textContent = "－";
+    }
+  });
+});
+
+/* =================== Init =================== */
+
+document.getElementById("btnCurrentMizuno").onclick = ()=>showViewMizuno("currentViewMizuno");
+document.getElementById("btnPreviousMizuno").onclick = ()=>showViewMizuno("previousViewMizuno");
+document.getElementById("btnTablesMizuno").onclick = ()=>showViewMizuno("tablesViewMizuno");
+
+document.getElementById("btnCurrentAbroad").onclick = ()=>showViewAbroad("currentViewAbroad");
+document.getElementById("btnPreviousAbroad").onclick = ()=>showViewAbroad("previousViewAbroad");
+document.getElementById("btnTablesAbroad").onclick = ()=>showViewAbroad("tablesViewAbroad");
+
+(async function init(){
+  try{
+    await loadDataFromBackend();
+
+    updateLiveCombined();
+    updateLiveForTeams(mizunoTeams,"live-mizuno","mizuno","Mizunoliga");
+    updateLiveForTeams(abroadTeams,"live-abroad","abroad","Utlandet");
+    updateUpcomingForTeams(mizunoTeams,"upcoming-mizuno");
+    updateUpcomingForTeams(abroadTeams,"upcoming-abroad");
+    updatePreviousForTeams(mizunoTeams,"previous-mizuno","Mizunoliga");
+    updatePreviousForTeams(abroadTeams,"previous-abroad","Utlandet");
+
+    // Oppdatering med intervaller
+    setInterval(updateLiveCombined,10000);
+    setInterval(()=>updateLiveForTeams(mizunoTeams,"live-mizuno","mizuno","Mizunoliga"),3000);
+    setInterval(()=>updateLiveForTeams(abroadTeams,"live-abroad","abroad","Utlandet"),3000);
+    setInterval(()=>updateUpcomingForTeams(mizunoTeams,"upcoming-mizuno"),300000);
+    setInterval(()=>updateUpcomingForTeams(abroadTeams,"upcoming-abroad"),300000);
+  }catch(e){
+    console.error(e);
+  }
+})();
+</script>
+</body>
+</html>

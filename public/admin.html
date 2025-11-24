@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8">
+  <title>Admin – Volleyball</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 16px;
+      background: #f5f7fb;
+    }
+    h1,h2 { margin-top: 0.8rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    label { display:block; font-size:0.85rem; margin-top:6px; }
+    input, select {
+      width: 100%;
+      padding: 6px 8px;
+      margin-top: 2px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 8px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      background: #0055aa;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    button:hover { background:#003f82; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      background: #fff;
+    }
+    th, td {
+      padding: 6px 8px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th { background:#e8edf7; }
+    .small-btn {
+      padding: 2px 6px;
+      font-size: 0.75rem;
+      margin-right: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Admin – Lag og spillere</h1>
+  <p><a href="index.html">⬅ Til liveoversikt</a></p>
+
+  <div class="grid">
+    <!-- Opprett lag -->
+<section>
+  <h2>Nytt lag</h2>
+
+  <label>Navn
+    <input id="teamName">
+  </label>
+
+  <label>Land
+    <input id="teamCountry" placeholder="Norge, Polen, ...">
+  </label>
+
+  <label>Liga
+    <input id="teamLeague" placeholder="Mizunoligaen, PlusLiga ...">
+  </label>
+
+  <label>Gruppe (mizuno/abroad)
+    <input id="teamGroup" placeholder="mizuno eller abroad">
+  </label>
+
+  <label>SofaScore team-id
+    <input id="teamSofascoreId" type="number">
+  </label>
+
+  <label>Tournament id
+    <input id="teamTournamentId" type="number">
+  </label>
+
+  <label>Season id
+    <input id="teamSeasonId" type="number">
+  </label>
+
+  <label>Widget-navn
+    <input id="teamWidgetName" placeholder="Eliteserien 25/26">
+  </label>
+
+  <label>Slug
+    <input id="teamSlug" placeholder="bk-troms-t2750">
+  </label>
+
+  <!-- NYE FELTER -->
+  <label>Hjemmeside URL
+    <input id="teamHomepageUrl" placeholder="https://...">
+  </label>
+
+  <label>Stream URL
+    <input id="teamStreamUrl" placeholder="https://...">
+  </label>
+
+  <button onclick="createTeam()">Lagre lag</button>
+</section>
+      <button onclick="createTeam()">Lagre lag</button>
+    </section>
+
+    <!-- Opprett spiller -->
+    <section>
+      <h2>Ny spiller</h2>
+      <label>Navn
+        <input id="playerName">
+      </label>
+      <label>Posisjon
+        <input id="playerPosition" placeholder="Libero, Opplegger ...">
+      </label>
+      <label>Draktnummer
+        <input id="playerNumber" type="number">
+      </label>
+      <label>Nasjonalitet
+        <input id="playerNationality" placeholder="Norge, Sverige ...">
+      </label>
+      <label>Ekstern lenke (Volleybox)
+        <input id="playerUrl" placeholder="https://volleybox.net/...">
+      </label>
+      <label>Lag
+        <select id="playerTeamSelect"></select>
+      </label>
+      <label>Bilde-URL
+        <input id="playerPhotoUrl" placeholder="https://.../portrait.jpg">
+      </label>
+
+
+      <button onclick="createPlayer()">Lagre spiller</button>
+    </section>
+  </div>
+
+  <h2>Lag i databasen</h2>
+  <div id="teamsTableWrapper"></div>
+
+  <h2>Spillere i databasen</h2>
+  <div id="playersTableWrapper"></div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>
