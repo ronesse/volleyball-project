@@ -2,21 +2,20 @@ const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 const fs = require("fs");
 
-// Lokalt ligger databasen i backend/volley.db
-const localDB = path.join(__dirname, "volley.db");
+// LOKAL database: backend/volley.db
+// __dirname peker til backend/ *eller* backend/routes/
+// Derfor må vi gå ett nivå opp for å finne volley.db
+const localDB = path.join(__dirname, "..", "volley.db");
 
-// På Render definerer vi DB_PATH = /var/data/volley.db
-// Hvis DB_PATH ikke finnes → bruk lokal database
+// RENDER-database:
 const DB_PATH = process.env.DB_PATH || localDB;
 
-// Hvis vi kjører på Render (DB_PATH settes alltid) og databasen
-// ikke finnes på persistent disk → kopier oppstartsdatabasen
+// Hvis vi kjører på Render og databasen ikke finnes på persistent disk:
 if (process.env.DB_PATH && !fs.existsSync(DB_PATH)) {
   console.log("📦 Kopierer volley.db til persistent disk første gang...");
   fs.copyFileSync(localDB, DB_PATH);
 }
 
-// Åpne databasen
 const db = new sqlite3.Database(DB_PATH, (err) => {
   if (err) {
     console.error("❌ SQLite error:", err.message);
