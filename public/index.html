@@ -1078,8 +1078,12 @@ async function openTeamModal(el){
                   ${p.position || "Posisjon ukjent"}
                   ${p.jersey_number ? ` • #${p.jersey_number}` : ""}
                   ${p.nationality ? ` • ${p.nationality}` : ""}
+		 ${p.height_cm ? ` • ${p.height_cm} cm` : ""}
+ 		 ${p.birth_year ? ` • f. ${p.birth_year}` : ""}
                 </div>
                 <div class="player-link">
+${p.youth_club ? `<div class="player-meta">Moderklubb: ${p.youth_club}</div>` : ""}
+${p.instagram ? `<div class="player-meta">Instagram: <a href="https://instagram.com/${p.instagram.replace('@', '')}" target="_blank">${p.instagram}</a></div>` : ""}
                   ${p.external_url ? `<a href="${p.external_url}" target="_blank">Profil</a>` : ""}
                 </div>
               </div>

@@ -1,4 +1,5 @@
 require("dotenv").config();
+
 function requireAuth(req, res, next) {
   const auth = req.headers.authorization;
 
@@ -10,10 +11,7 @@ function requireAuth(req, res, next) {
   const base64 = auth.replace("Basic ", "");
   const [user, pass] = Buffer.from(base64, "base64").toString().split(":");
 
-  if (
-    user === process.env.ADMIN_USER &&
-    pass === process.env.ADMIN_PASS
-  ) {
+  if (user === process.env.ADMIN_USER && pass === process.env.ADMIN_PASS) {
     next();
   } else {
     res.status(403).send("Forbidden");
@@ -25,7 +23,7 @@ const cors = require("cors");
 const path = require("path");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;   //  ⭐ IMPORTANT FOR RENDER ⭐
 
 // Middleware
 app.use(cors());
@@ -42,11 +40,11 @@ const playersRouter = require("./routes/players");
 app.use("/api/teams", teamsRouter);
 app.use("/api/players", playersRouter);
 
-// Fallback – send index om noen går direkte til /admin osv. (valgfritt)
+// Catch-all
 app.get("*", (req, res) => {
   res.sendFile(path.join(publicPath, "index.html"));
 });
 
 app.listen(PORT, () => {
-  console.log(`Server kjører på http://localhost:${PORT}`);
+  console.log(`Server kjører på port ${PORT}`);
 });

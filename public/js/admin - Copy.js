@@ -23,17 +23,12 @@ async function api(path, options = {}) {
 ================================= */
 
 function scrollToSection(id, focusId) {
-  document.getElementById("addSection").style.display = "grid"; // auto open
   document.getElementById(id).scrollIntoView({
     behavior: "smooth",
     block: "start",
   });
   setTimeout(() => document.getElementById(focusId).focus(), 200);
-
-  document.getElementById("toggleAddBtn").textContent = "➖ Skjul";
 }
-
-/* ---- RESET TEAM FORM ---- */
 
 function resetTeamForm() {
   [
@@ -56,8 +51,6 @@ function resetTeamForm() {
   btn.onclick = createTeam;
 }
 
-/* ---- RESET PLAYER FORM ---- */
-
 function resetPlayerForm() {
   [
     "playerName",
@@ -78,23 +71,6 @@ function resetPlayerForm() {
   btn.textContent = "Lagre spiller";
   btn.onclick = createPlayer;
 }
-
-/* ===============================
-   TOGGLE SHOW/HIDE ADD SECTION
-================================= */
-
-document.getElementById("toggleAddBtn").onclick = () => {
-  const box = document.getElementById("addSection");
-  const btn = document.getElementById("toggleAddBtn");
-
-  if (box.style.display === "none") {
-    box.style.display = "grid";
-    btn.textContent = "➖ Skjul";
-  } else {
-    box.style.display = "none";
-    btn.textContent = "➕ Legg til…";
-  }
-};
 
 /* ===============================
    TEAM HANDLING
@@ -154,7 +130,7 @@ async function loadTeams() {
 /* ---------- SEARCH TEAMS ---------- */
 
 document.getElementById("teamSearchInput").oninput = () => {
-  const q = teamSearchInput.value.toLowerCase();
+  const q = document.getElementById("teamSearchInput").value.toLowerCase();
 
   const filtered = cachedTeams.filter(
     t =>
@@ -196,9 +172,6 @@ async function createTeam() {
 function editTeam(id) {
   const t = cachedTeams.find(x => x.id === id);
   if (!t) return;
-
-  document.getElementById("addSection").style.display = "grid";
-  document.getElementById("toggleAddBtn").textContent = "➖ Skjul";
 
   editingTeamId = id;
 
@@ -358,9 +331,6 @@ async function createPlayer() {
 function editPlayer(id) {
   const p = cachedPlayers.find(x => x.id === id);
   if (!p) return;
-
-  document.getElementById("addSection").style.display = "grid";
-  document.getElementById("toggleAddBtn").textContent = "➖ Skjul";
 
   editingPlayerId = id;
 
